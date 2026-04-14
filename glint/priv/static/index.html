@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Glint</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Georgia', serif;
+      background: #fff;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .container {
+      width: 100%;
+      max-width: 420px;
+      padding: 40px 20px;
+      text-align: center;
+    }
+    h1 {
+      font-size: 2rem;
+      font-weight: normal;
+      font-style: italic;
+      color: #1a1a1a;
+      margin-bottom: 8px;
+    }
+    .subtitle {
+      font-family: sans-serif;
+      font-size: 0.85rem;
+      color: #888;
+      margin-bottom: 32px;
+    }
+    input {
+      width: 100%;
+      padding: 14px 16px;
+      margin-bottom: 12px;
+      border: 1px solid #e8c8cc;
+      border-radius: 10px;
+      font-size: 0.9rem;
+      color: #333;
+      outline: none;
+      background: #fff;
+    }
+    input::placeholder { color: #bbb; }
+    input:focus { border-color: #f4a0aa; }
+    button.add {
+      width: 100%;
+      padding: 14px;
+      background: #f9c5ca;
+      color: #333;
+      border: none;
+      border-radius: 10px;
+      font-size: 0.85rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      cursor: pointer;
+      margin-bottom: 10px;
+      transition: background 0.2s;
+    }
+    button.add:hover { background: #f4a0aa; }
+    ul {
+      list-style: none;
+      margin-top: 28px;
+      text-align: left;
+    }
+    li {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 14px 16px;
+      border: 1px solid #f0d8da;
+      border-radius: 10px;
+      margin-bottom: 10px;
+      font-family: sans-serif;
+      font-size: 0.9rem;
+      color: #444;
+      background: #fff;
+    }
+    button.del {
+      background: none;
+      border: 1px solid #f4a0aa;
+      color: #f4a0aa;
+      border-radius: 8px;
+      padding: 5px 12px;
+      font-size: 0.75rem;
+      cursor: pointer;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      transition: all 0.2s;
+    }
+    button.del:hover { background: #f9c5ca; color: #333; }
+    .empty {
+      font-family: sans-serif;
+      font-size: 0.85rem;
+      color: #ccc;
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>My Tasks</h1>
+    <p class="subtitle">Stay on top of everything</p>
+    <input id="input" type="text" placeholder="Add a new task..." />
+    <button class="add" onclick="addTask()">Add Task</button>
+    <ul id="list"></ul>
+    <p class="empty" id="empty" style="display:none">No tasks yet. Add one above</p>
+  </div>
+  <script>
+    async function loadTasks() {
+      const res = await fetch('/tasks');
+      const tasks = await res.json();
+      const list = document.getElementById('list');
+      const empty = document.getElementById('empty');
+      if (tasks.length === 0) {
+        list.innerHTML = '';
+        empty.style.display = 'block';
+      } else {
+        empty.style.display = 'none';
+        list.innerHTML = tasks.map(t => `
+          <li>
+            <span>${t.title}</span>
+            <button class="del" onclick="deleteTask(${t.id})">Delete</button>
+          </li>
+        `).join('');
+      }
+    }
+    async function addTask() {
+      const input = document.getElementById('input');
+      const title = input.value.trim();
+      if (!title) return;
+      await fetch('/tasks', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title })
+      });
+      input.value = '';
+      loadTasks();
+    }
+    async function deleteTask(id) {
+      await fetch('/tasks/' + id, { method: 'DELETE' });
+      loadTasks();
+    }
+    document.getElementById('input').addEventListener('keydown', e => {
+      if (e.key === 'Enter') addTask();
+    });
+    loadTasks();
+  </script>
+</body>
+</html>
