@@ -56,7 +56,14 @@ Then open [http://localhost:8000](http://localhost:8000) in your browser.
 
 ---
 
+
+## ✦ is how it looks when you run Gleam and open `http://localhost:8000` in your browser:
+
+![glint](glint.png)
+
 ## ✦ license
+
+---
 
 MIT License — Copyright (c) 2026 pxxelina
 
